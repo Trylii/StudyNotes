@@ -1,0 +1,54 @@
+WebService
+一、技术基础：
+  1.XML+XSD：
+　　WebService采用HTTP协议传输数据，采用XML格式封装数据（即XML中说明调用远程服务对象的哪个方法，传
+递的参数是什么，以及服务对象的 返回结果是什么）。XML是WebService平台中表示数据的格式。除了易于建立
+和易于分析外，XML主要的优点在于它既是平台无关的，又是厂商无关 的。无关性是比技术优越性更重要的：软
+件厂商是不会选择一个由竞争对手所发明的技术的。 
+　　XML解决了数据表示的问题，但它没有定义一套标准的数据类型，更没有说怎么去扩展这套数据类型。
+例如，整形数到底代表什么？16位，32位，64位？这 些细节对实现互操作性很重要。XML Schema(XSD)就是专门
+解决这个问题的一套标准。它定义了一套标准的数据类型，并给出了一种语言来扩展这套数据类型。WebService
+平台就 是用XSD来作为其数据类型系统的。当你用某种语言(如VB.NET或C#)来构造一个Webservice时，为了符合
+WebService标准，所 有你使用的数据类型都必须被转换为XSD类型。你用的工具可能已经
+自动帮你完成了这个转换，但你很可能会根据你的需要修改一下转换过程。
+  2.soap：
+    WebService通过HTTP协议发送请求和接收结果时，发送的请求内容和结果内容都采用XML格式封装，并增
+加了一些特定的HTTP消息头，以说明 HTTP消息的内容格式，这些特定的HTTP消息头和XML内容格式就是SOAP协议。
+SOAP提供了标准的RPC方法来调用Web Service。
+    SOAP协议 = HTTP协议 + XML数据格式 
+    SOAP协议定义了SOAP消息的格式，SOAP协议是基于HTTP协议的，SOAP也是基于XML和XSD的，XML是SOAP的
+数据编码方式。打个比 喻：HTTP就是普通公路，XML就是中间的绿色隔离带和两边的防护栏，SOAP就是普通公路
+经过加隔离带和防护栏改造过的高速公路。
+  3.WSDL
+    好比我们去商店买东西，首先要知道商店里有什么东西可买，然后再来购买，商家的做法就是张贴广告海报。
+WebService也一样，WebService客户端要调用一个WebService服务，首先要有知道这个服务的地址在哪，以及这个
+服务里有什么方 法可以调用，所以，WebService务器端首先要通过一个WSDL文件来说明自己家里有啥服务可以对
+外调用，服务是什么（服务中有哪些方法，方法接受 的参数是什么，返回值是什么），服务的网络地址用哪个url
+地址表示，服务通过什么方式来调用。
+　　WSDL(Web Services Description Language)就是这样一个基于XML的语言，用于描述Web Service及其函数、
+参数和返回值。它是WebService客户端和服务器端都 能理解的标准格式。因为是基于XML的，所以WSDL既是机器可
+阅读的，又是人可阅读的，这将是一个很大的好处。一些最新的开发工具既能根据你的 Web service生成WSDL文档，
+又能导入WSDL文档，生成调用相应WebService的代理类代码。
+　　WSDL 文件保存在Web服务器上，通过一个url地址就可以访问到它。客户端要调用一个WebService服务之前，要
+知道该服务的WSDL文件的地址。 WebService服务提供商可以通过两种方式来暴露它的WSDL文件地址：1.注册到UDDI 
+服务器，以便被人查找；2.直接告诉给客户端调用者。
+二、知识小节：
+  1、WebService是什么？
+　　1.1 基于Web的服务：服务器端整出一些资源让客户端应用访问（获取数据）
+　　1.2 一个跨语言、跨平台的规范（抽象）
+　　1.3 多个跨平台、跨语言的应用间通信整合的方案（实际）
+  2、为什么要用 Web service？
+　　web service能解决：跨平台调用 跨语言调用  远程调用
+  3、什么时候使用web Service?
+　　3.1. 同一家公司的新旧应用之间
+　　3.2. 不同公司的应用之间
+　　3.3. 一些提供数据的内容聚合应用：天气预报、股票行情
+  4、Web Service中的几个重要术语
+       4.1、WSDL(web service definition language)
+　　WSDL是webservice定义语言, 对应.wsdl文档, 一个webservice会对应一个唯一的wsdl文档, 定义了客户端与服务端发送请求和响应的数据格式和过程
+       4.2、SOAP(simple object  access protocal)
+　　SOAP是"简单对象访问协议"是一种简单的、基于HTTP和XML的协议, 用于在WEB上交换结构化的数据。soap消息：请求消息和响应消息
+       4.3、SEI(WebService EndPoint Interface)
+　　SEI是web service的终端接口，就是WebService服务器端用来处理请求的接口
+       4.4、CXF(Celtix + XFire)
+    一个apache的用于开发webservice服务器端和客户端的框架。
