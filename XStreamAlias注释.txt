@@ -1,0 +1,190 @@
+xml与java对象转换 -- XStreamAlias
+@XStreamAlias使用
+一、 特点:
+简化的API; 
+无映射文件; 
+高性能,低内存占用; 
+整洁的XML; 
+不需要修改对象;支持内部私有字段,不需要setter/getter方法 
+提供序列化接口; 
+自定义转换类型策略; 
+
+XStream的优点很多，但是也有一些小bug，比如在定义别名中的下划线“_”转换为xml后会变成“__”这个符号， 不过下划线问题可以用下面这个解决
+ XStream xStream = new XStream(new XppDriver(new XmlFriendlyNameCoder("_-", "_")));
+二、 使用场景
+Transport转换 
+Persistence 持久化对象 
+Configuration 配置 
+Unit Tests 单元测试
+Interface服务之间XML消息的交互
+
+案例代码：
+@XStreamAlias("kfpt_dept") //注意这个，后面变成了<kfpt__dept>  下划线。。。。
+class Dept {
+    private String deptName;
+
+    private List<Staff> staffs;
+
+    public String getDeptName() {
+        return deptName;
+    }
+
+    public void setDeptName(String deptName) {
+        this.deptName = deptName;
+    }
+
+    public List<Staff> getStaffs() {
+        return staffs;
+    }
+
+    public void setStaffs(List<Staff> staffs) {
+        this.staffs = staffs;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
+    }
+}
+
+@XStreamAlias("kfpt_staffs")
+class Staff {
+    private String name;
+    private int age;
+
+    public Staff() {
+        super();
+    }
+
+    public Staff(String name, int age) {
+        super();
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
+    }
+
+}
+
+转换工具类：
+public class XstreamUtil {
+    
+    /**
+     * 将bean转换为xml
+     * @param obj 转换的bean
+     * @return bean转换为xml
+     */
+    public static String objectToXml(Object obj) {
+      //  XStream xStream = new XStream();
+ XStream xStream = new XStream(new XppDriver(new XmlFriendlyNameCoder("_-", "_")));//解决下划线问题
+        //xstream使用注解转换
+       xStream.processAnnotations(obj.getClass());
+        return xStream.toXML(obj);
+    }
+ 
+    /**
+     * 将xml转换为bean
+     * @param <T> 泛型
+     * @param xml 要转换为bean的xml
+     * @param cls bean对应的Class
+     * @return xml转换为bean
+     */
+    public static <T> T xmlToObject(String xml, Class<T> cls){
+        XStream xstream = new XStream(new DomDriver());
+        //xstream使用注解转换
+        xstream.processAnnotations(cls);
+        return (T) xstream.fromXML(xml);
+    }
+}
+
+main方法测试：
+public static void main(String[] args) {
+        //java bean 转 xml
+        Dept d = new Dept();
+        List<Staff> staffs = new ArrayList<>();
+        Staff s1 = new Staff("wuyun", 20);
+        Staff s2 = new Staff("lilei", 22);
+        staffs.add(s1);
+        staffs.add(s2);
+        d.setDeptName("开放平台");
+        d.setStaffs(staffs);
+        System.out.println(objectToXml(d));
+/*
+
+ 用这个方法 XStream xStream = new XStream(); 会有下划线问题
+<kfpt__dept>
+  <deptName>开放平台</deptName>
+  <staffs>
+    <kfpt__staffs>
+      <name>wuyun</name>
+      <age>20</age>
+    </kfpt__staffs>
+    <kfpt__staffs>
+      <name>lilei</name>
+      <age>22</age>
+    </kfpt__staffs>
+  </staffs>
+</kfpt__dept>
+ 
+XStream xStream = new XStream(new XppDriver(new XmlFriendlyNameCoder("_-", "_")));//可以解决下划线问题
+
+<kfpt_dept>
+  <deptName>开放平台</deptName>
+  <staffs>
+    <kfpt_staffs>
+      <name>wuyun</name>
+      <age>20</age>
+    </kfpt_staffs>
+    <kfpt_staffs>
+      <name>lilei</name>
+      <age>22</age>
+    </kfpt_staffs>
+  </staffs>
+</kfpt_dept>
+*/
+        
+        //xml 转 java bean 
+        // String xml = "<kfpt__dept><deptName>开放平台</deptName><staffs><kfpt__staffs><name>wuyun</name><age>20</age></kfpt__staffs><kfpt__staffs><name>lilei</name><age>22</age></kfpt__staffs></staffs></kfpt__dept>";
+        //        XStream xstream = new XStream(new DomDriver());
+        //        //xstream使用注解转换
+        //        xstream.processAnnotations(Dept.class);
+        //        System.out.println(((Dept) xstream.fromXML(xml)).toString());
+
+        //        System.out.println(xmlToObject(xml, Dept.class).toString());
+/*
+
+com.cmcc.open.ss.vo.req.Dept@5660d2d2[
+  deptName=开放平台
+  staffs=[com.cmcc.open.ss.vo.req.Staff@6eb1054b[
+  name=wuyun
+  age=20
+], com.cmcc.open.ss.vo.req.Staff@27d2b7b3[
+  name=lilei
+  age=22
+]]
+]
+
+*/
+
+
+
+    }
