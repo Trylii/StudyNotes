@@ -1,0 +1,5 @@
+String、StringBuilder、StringBuffer
+①String:适用于少量的字符串操作的情况
+②StringBuilder:适用于单线程下在字符串缓冲区进行大量操作的情况
+③StringBuffer:适用于多线程下在字符串缓冲区进行大量操作的情况
+运行速度：StringBuilder>StringBuffer>String
