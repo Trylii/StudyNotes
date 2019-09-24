@@ -1,0 +1,85 @@
+SUBSTRING_INDEX(column_name,' ',i) 
+提取部分字符：提取字段名为column_name的字段的第i个分隔符之前的字符。
+
+创建外键：
+CREATE TABLE interests(
+int_id NOT NULL AUTO_INCREMENT PRIMARY KEY,
+interest VARCHAR(50) NOT NULL,
+contact_id INT NOT NULL, #创建外键 设定为 INT 与 NOT NULL
+CONSTRAINT my_contacts_contact_id_fk 
+  #CONSTRAINT：告知我们主键的来源表(my_contacts) 主键的名称(contact_id)还能说明这是一个外键(fk)
+FOREIGN KEY (contact_id) #括号中的列名就代表外键
+REFERENCES my_contacts (contact_id) #这部分指定了外键的来源表 括号中的是外键在来源表的名称
+);
+
+junction table(连接表)：
+在两个多对多的表之间需要一个中间桥梁来储存两张表的主键，从而把关系转化为一对多。这个中间桥梁就是连接表。
+
+范式：
+1.第一范式（1NF）：
+规则一：数据列只包含具有原子性的值。
+规则二：没有重复的数据组。
+函数依赖：
+一张表中，一列元素会因为其他列的改变而改变，则成此列函数依赖于其他列。
+速记符号：T.x -> T.y 可以理解为在关系表T中，y列 函数依赖 于x列，从右往左解读。
+传递函数依赖：
+指任何非键列依赖于另一个非键列。
+2.第二范式（2NF）：
+规则一：先符合1NF。
+规则二：没有部分函数依赖性。
+3.第三范式（3NF）：
+规则一：符合2NF。
+规则二：没有传递函数依赖。
+
+ALTER TABLE my_contacts
+ADD COLUMN interest1 VARCHAR(50),
+ADD COLUMN interest2 VARCHAR(50),
+ADD COLUMN interest3 VARCHAR(50),
+ADD COLUMN interest4 VARCHAR(50);
+
+UPDATE my_contacts
+SET interest1 = SUBSTRING_INDEX(interests, ',', 1);
+#SUBSTRING_INDEX(要截取的数据, 要查找的分隔符，此处为',', 查找的是第几个分隔符)
+
+UPDATE my_contacts
+SET interests = SUBSTR(interests, LENGTH(interest1)+2);
+#SUBSTR返回本列内原始字符串的一部分。它接受字符串并切除我们用括号指定的第一部分，然后返回剩下的部分。
+
+关键字AS：
+1.CREATE TABLE profession AS #创建只有一列的profession表，并填入SELECT的查询结果。
+       SELECT profession FROM my_contacts
+       GROUP BY profession
+       ORDER BY profession;
+   ALTER TABLE profession
+   ADD COLUMN id INT NOT NULL AUTO_INCREMENT FIRST,
+   ADD PRIMARY KEY (id);
+2.CREATE TABLE profession
+   (
+       id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+       profession varchar(20)
+   ) AS #创建profession表时一并创建主键与profession列，并以SELECT的查询结果填满profession列。
+     SELECT profession FROM my_contacts
+     GROUP BY profession
+     ORDER BY profession;
+AS：会引用某个查询的结果来安插至另一个表中。
+AS能把SELECT的查询结果填入新表中。
+如果不指定新表具有带有新名称的两列，AS只会创建一列，且该列的列明及数据类型与SELECT的查询结果相同。
+
+列的别名：
+在查询中首次使用原始列名的地方后接AS并设定要采用的别名，告诉软件现在开始以另一个名称引用该列，这样查询可以更容易被理解。
+CREATE TABLE profession
+(
+    id INT(11) NOT NULL AUTO_INCREMNET PRIMARY KEY,
+    mc_prof varchar(20)
+)   AS 
+    SELECT profession AS mc_prof FROM my_contacts #查询里首次提到原始列名的地方后接AS并设定别名后，软件从这里开始用别名引用数据。
+    GROUP BY mc_prof
+    ORDER BY mc_prof;
+
+SELECT mc.email FROM my_contacts AS mc 
+EXISTS
+(SELECT * FROM contact_interest AS ci WHERE mc.contact_id = ci.contact_id)
+AND 
+NOT EXISTS
+(SELECT * FROM job_current jc 
+WHERE mc.contact_id = jc.contact_id)
